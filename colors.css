@@ -1,0 +1,5 @@
+$blue: #056ef0;
+
+.font-color {
+  color: $blue;
+}

@@ -3,23 +3,18 @@ import validate from 'webpack-validator';
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import precss from 'precss';
+import autoprefixer from 'autoprefixer';
 
 const production = process.env.NODE_ENV === 'production';
 
+const cssLoaderConfig = 'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss'
 const cssLoaders = production ?
-  ExtractTextPlugin.extract('style-loader', 'css-loader') :
-  'style!css';
+  ExtractTextPlugin.extract('style', cssLoaderConfig) :
+  `style!${cssLoaderConfig}`;
 
 const prodPlugins = production ? [
-  new webpack.optimize.UglifyJsPlugin({
-    compressor: {
-      warnings: false,
-    },
-    output: {
-      comments: false, // Also removes licences
-    },
-  }),
-  new ExtractTextPlugin('style.[contenthash:8].css', { allChunks: true }),
+  new ExtractTextPlugin('style.css', { allChunks: true }),
 ] : [];
 
 
@@ -44,5 +39,9 @@ export default validate({
       },
     }),
     ...prodPlugins,
+  ],
+  postcss: () => [
+    autoprefixer({ browsers: ['> 0.5% in NL'] }),
+    precss,
   ],
 });

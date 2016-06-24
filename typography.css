@@ -1,0 +1,4 @@
+.default-font {
+  font-family: sans-serif;
+  composes: font-color from './colors.css';
+}
