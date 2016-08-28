@@ -8,7 +8,9 @@ import precss from 'precss';
 import autoprefixer from 'autoprefixer';
 import webpack from 'webpack';
 
-const production = process.env.NODE_ENV === 'production';
+const production =
+  process.env.NODE_ENV === 'production' &&
+  !/true/i.test(process.env.REACT_CARDS);
 
 const cssLoaderConfig = [
   'css?modules',

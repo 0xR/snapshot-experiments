@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon -w webpack.config.babel.js --exec webpack-dev-server",
-    "reactcards": "reactcards -p 8000 -e ./src/cards-entry.js",
+    "reactcards": "REACT_CARDS=true nodemon -w webpack.config.babel.js --exec 'reactcards -p 8000 -c webpack.config.js -e ./src/cards-entry.js'",
     "test": "mocha --opts test-config/mocha.opts",
     "test:watch": "mocha --opts test-config/mocha.opts --watch",
     "lint": "eslint --cache --fix '**/*.js' '**/*.jsx'",
