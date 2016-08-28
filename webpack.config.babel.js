@@ -1,3 +1,4 @@
+/* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
 import validate from 'webpack-validator';
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -5,10 +6,16 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import stylelint from 'stylelint';
 import precss from 'precss';
 import autoprefixer from 'autoprefixer';
+import webpack from 'webpack';
 
 const production = process.env.NODE_ENV === 'production';
 
-const cssLoaderConfig = 'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss';
+const cssLoaderConfig = [
+  'css?modules',
+  'importLoaders=1',
+  'localIdentName=[name]__[local]___[hash:base64:5]' +
+  '!postcss',
+];
 const cssLoaders = production ?
   ExtractTextPlugin.extract('style', cssLoaderConfig) :
   `style!${cssLoaderConfig}`;
@@ -19,14 +26,18 @@ const prodPlugins = production ? [
 
 
 export default validate({
-  entry: './index.js',
+  entry: [
+    'webpack-dev-server/client?http://0.0.0.0:8080',
+    'webpack/hot/only-dev-server',
+    './index.jsx',
+  ],
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.[hash:8].js',
   },
   module: {
     loaders: [
-      { test: /\.js$/, exclude: /node_modules/, loader: 'babel' },
+      { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['react-hot', 'babel'] },
       { test: /\.css$/, loader: cssLoaders },
     ],
   },
@@ -38,6 +49,7 @@ export default validate({
         collapseWhitespace: true,
       },
     }),
+    new webpack.HotModuleReplacementPlugin(),
     ...prodPlugins,
   ],
   postcss: () => [
