@@ -1,14 +1,14 @@
-import webpack from 'webpack';
 import validate from 'webpack-validator';
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import stylelint from 'stylelint';
 import precss from 'precss';
 import autoprefixer from 'autoprefixer';
 
 const production = process.env.NODE_ENV === 'production';
 
-const cssLoaderConfig = 'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss'
+const cssLoaderConfig = 'css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!postcss';
 const cssLoaders = production ?
   ExtractTextPlugin.extract('style', cssLoaderConfig) :
   `style!${cssLoaderConfig}`;
@@ -41,6 +41,7 @@ export default validate({
     ...prodPlugins,
   ],
   postcss: () => [
+    stylelint,
     autoprefixer({ browsers: ['> 0.5% in NL'] }),
     precss,
   ],
