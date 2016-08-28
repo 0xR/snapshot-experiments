@@ -29,7 +29,7 @@ export default validate({
   entry: [
     'webpack-dev-server/client?http://0.0.0.0:8080',
     'webpack/hot/only-dev-server',
-    './index.jsx',
+    './src/index.jsx',
   ],
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -43,7 +43,7 @@ export default validate({
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'index.html'),
+      template: path.resolve(__dirname, 'src', 'index.html'),
       inject: 'body',
       minify: production && {
         collapseWhitespace: true,
