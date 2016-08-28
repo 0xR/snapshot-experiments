@@ -15,7 +15,7 @@ const cssLoaderConfig = [
   'importLoaders=1',
   'localIdentName=[name]__[local]___[hash:base64:5]' +
   '!postcss',
-];
+].join('&');
 const cssLoaders = production ?
   ExtractTextPlugin.extract('style', cssLoaderConfig) :
   `style!${cssLoaderConfig}`;
@@ -37,7 +37,7 @@ export default validate({
   },
   module: {
     loaders: [
-      { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['react-hot', 'babel'] },
+      { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['babel'] },
       { test: /\.css$/, loader: cssLoaders },
     ],
   },

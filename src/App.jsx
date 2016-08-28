@@ -1,6 +1,6 @@
 import React from 'react';
 
-import styles from './render.css';
+import styles from './App.css';
 
 export default () => (
   <div>
