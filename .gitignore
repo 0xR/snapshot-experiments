@@ -1,2 +1,4 @@
 bundle.js
 dist/
+.tmp/
+*.log*

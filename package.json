@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon -w webpack.config.babel.js --exec webpack-dev-server",
+    "build": "NODE_ENV=production webpack",
+    "prebuild": "rm -rf dist",
     "reactcards": "REACT_CARDS=true nodemon -w webpack.config.babel.js --exec 'reactcards -p 8000 -c webpack.config.js -e ./src/cards-entry.js'",
-    "test": "mocha --opts test-config/mocha.opts",
-    "test:watch": "mocha --opts test-config/mocha.opts --watch",
+    "test": "mocha-webpack --opts test-config/mocha.opts",
+    "test:watch": "npm run test -- --watch",
     "lint": "eslint --cache --fix '**/*.js' '**/*.jsx'",
     "lint:watch": "nodemon -w . -e js,jsx --exec npm run lint"
   },
@@ -23,6 +25,7 @@
     "babel-preset-react": "^6.11.1",
     "babel-register": "^6.14.0",
     "chai": "^3.5.0",
+    "chai-jest-snapshot": "^0.1.2",
     "css-loader": "^0.24.0",
     "eslint": "^3.4.0",
     "eslint-config-airbnb": "^10.0.1",
@@ -30,8 +33,10 @@
     "eslint-plugin-jsx-a11y": "^2.2.0",
     "eslint-plugin-react": "^6.1.2",
     "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.22.0",
     "mocha": "^3.0.2",
+    "mocha-webpack": "^0.6.0",
     "nodemon": "^1.10.2",
     "postcss-loader": "^0.11.0",
     "precss": "^1.4.0",
@@ -43,8 +48,10 @@
     "stylelint": "^7.1.0",
     "stylelint-config-standard": "^12.0.0",
     "stylelint-property-unknown": "^1.0.1",
+    "url-loader": "^0.5.7",
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.15.0",
+    "webpack-merge": "^0.14.1",
     "webpack-validator": "^2.2.7"
   },
   "dependencies": {

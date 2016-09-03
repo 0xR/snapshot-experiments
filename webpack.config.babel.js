@@ -7,32 +7,19 @@ import stylelint from 'stylelint';
 import precss from 'precss';
 import autoprefixer from 'autoprefixer';
 import webpack from 'webpack';
+import merge from 'webpack-merge';
 
-const production =
-  process.env.NODE_ENV === 'production' &&
-  !/true/i.test(process.env.REACT_CARDS);
+const target = process.env.npm_lifecycle_event;
 
 const cssLoaderConfig = [
   'css?modules',
   'importLoaders=1',
-  'localIdentName=[name]__[local]___[hash:base64:5]' +
-  '!postcss',
+  'localIdentName=[name]__[local]___[hash:base64:5]',
 ].join('&');
-const cssLoaders = production ?
-  ExtractTextPlugin.extract('style', cssLoaderConfig) :
-  `style!${cssLoaderConfig}`;
 
-const prodPlugins = production ? [
-  new ExtractTextPlugin('style.css', { allChunks: true }),
-] : [];
+const cssLoaders = [cssLoaderConfig, 'postcss'];
 
-
-export default validate({
-  entry: [
-    'webpack-dev-server/client?http://0.0.0.0:8080',
-    'webpack/hot/only-dev-server',
-    './src/index.jsx',
-  ],
+let result = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.[hash:8].js',
@@ -40,23 +27,83 @@ export default validate({
   module: {
     loaders: [
       { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['babel'] },
-      { test: /\.css$/, loader: cssLoaders },
+      { test: /\.(jpe?g|png|gif)$/i, loader: 'file-loader?name=[name].[hash:8].[ext]' },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'src', 'index.html'),
-      inject: 'body',
-      minify: production && {
-        collapseWhitespace: true,
-      },
-    }),
-    new webpack.HotModuleReplacementPlugin(),
-    ...prodPlugins,
-  ],
   postcss: () => [
     stylelint,
     autoprefixer({ browsers: ['> 0.5% in NL'] }),
     precss,
   ],
-});
+};
+
+const production = process.env.NODE_ENV === 'production';
+
+if (production && target !== 'reactcards') {
+  result = merge(result, {
+    entry: [
+      './src/index.jsx',
+    ],
+    module: {
+      loaders: [
+        { test: /\.css$/, loader: ExtractTextPlugin.extract(cssLoaders) },
+      ],
+    },
+    plugins: [
+      new ExtractTextPlugin('style.[contenthash:8].css', { allChunks: true }),
+      new webpack.optimize.UglifyJsPlugin({
+        compressor: {
+          warnings: false,
+        },
+        output: {
+          comments: false, // Also removes licences
+        },
+      }),
+      new webpack.optimize.DedupePlugin(),
+      new webpack.optimize.OccurenceOrderPlugin(),
+    ],
+  });
+} else {
+  result = merge(result, {
+    module: {
+      loaders: [
+      { test: /\.css$/, loaders: cssLoaders },
+      ],
+    },
+  });
+
+  if (target === 'test') {
+    result = merge(result, {
+      entry: [],
+    });
+  } else {
+    result = merge.smart(result, {
+      entry: [
+        'webpack-dev-server/client?http://0.0.0.0:8080',
+        'webpack/hot/only-dev-server',
+        './src/index.jsx',
+      ],
+      module: {
+        loaders: [
+          { test: /\.css$/, loaders: ['style'] },
+        ],
+      },
+      plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+      ],
+    });
+    if (target === 'start') {
+      result = merge.smart(result, {
+        plugins: [
+          ...result.plugins,
+          new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, 'src', 'index.html'),
+            inject: 'body',
+          }),
+        ],
+      });
+    }
+  }
+}
+
+export default validate(result);
