@@ -8,6 +8,7 @@ import precss from 'precss';
 import autoprefixer from 'autoprefixer';
 import webpack from 'webpack';
 import merge from 'webpack-merge';
+import NodePathReplacePlugin from './NodePathReplacePlugin.js';
 
 function getCssLoaders() {
   const cssLoaderConfig = [
@@ -71,15 +72,15 @@ function unitTestConfig(base) {
   return merge.smart(base, {
     entry: [],
     target: 'node',
-    node: {
-      __dirname: true,
-      __filename: true,
-    },
     module: {
       loaders: [
         { test: /\.css$/, loaders: ['fake-style'] },
       ],
     },
+    plugins: [
+      ...base.plugins,
+      new NodePathReplacePlugin(),
+    ],
   });
 }
 

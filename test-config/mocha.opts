@@ -1,4 +1,4 @@
 --require babel-register
 --require test-config/mochasetup.js
 --webpack-config webpack.config.js
-**/__tests__/*[Ss]pec.js
+**/__tests__/*[Ss]pec.js*
