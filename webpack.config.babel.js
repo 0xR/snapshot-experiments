@@ -68,12 +68,17 @@ function addCssLoaders(base) {
 }
 
 function unitTestConfig(base) {
-  return merge(base, {
+  return merge.smart(base, {
     entry: [],
     target: 'node',
     node: {
       __dirname: true,
       __filename: true,
+    },
+    module: {
+      loaders: [
+        { test: /\.css$/, loaders: ['fake-style'] },
+      ],
     },
   });
 }
