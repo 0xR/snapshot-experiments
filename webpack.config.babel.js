@@ -9,17 +9,125 @@ import autoprefixer from 'autoprefixer';
 import webpack from 'webpack';
 import merge from 'webpack-merge';
 
-const target = process.env.npm_lifecycle_event;
+function getCssLoaders() {
+  const cssLoaderConfig = [
+    'css?modules',
+    'importLoaders=1',
+    'localIdentName=[name]__[local]___[hash:base64:5]',
+  ].join('&');
 
-const cssLoaderConfig = [
-  'css?modules',
-  'importLoaders=1',
-  'localIdentName=[name]__[local]___[hash:base64:5]',
-].join('&');
+  return [cssLoaderConfig, 'postcss'];
+}
 
-const cssLoaders = [cssLoaderConfig, 'postcss'];
+function htmlWebpackPlugin(minify) {
+  return new HtmlWebpackPlugin({
+    template: path.resolve(__dirname, 'src', 'index.html'),
+    inject: 'body',
+    minify: minify && {
+      collapseWhitespace: true,
+    },
+  });
+}
 
-let result = {
+function productionBuild(base) {
+  return merge(base, {
+    entry: [
+      './src/index.jsx',
+    ],
+    module: {
+      loaders: [
+        { test: /\.css$/, loader: ExtractTextPlugin.extract(getCssLoaders()) },
+      ],
+    },
+    plugins: [
+      ...base.plugins,
+      htmlWebpackPlugin(true),
+      new ExtractTextPlugin('style.[contenthash:8].css', { allChunks: true }),
+      new webpack.optimize.UglifyJsPlugin({
+        compressor: {
+          warnings: false,
+        },
+        output: {
+          comments: false, // Also removes licences
+        },
+      }),
+      new webpack.optimize.DedupePlugin(),
+      new webpack.optimize.OccurenceOrderPlugin(),
+    ],
+  });
+}
+
+function addCssLoaders(base) {
+  return merge(base, {
+    module: {
+      loaders: [
+        { test: /\.css$/, loaders: getCssLoaders() },
+      ],
+    },
+  });
+}
+
+function unitTestConfig(base) {
+  return merge(base, {
+    entry: [],
+    target: 'node',
+    node: {
+      __dirname: true,
+      __filename: true,
+    },
+  });
+}
+
+function addHotLoaderConfig(base) {
+  return merge.smart(base, {
+    entry: [
+      'webpack-dev-server/client?http://0.0.0.0:8080',
+      'webpack/hot/only-dev-server',
+      './src/index.jsx',
+    ],
+    module: {
+      loaders: [
+        { test: /\.css$/, loaders: ['style'] },
+      ],
+    },
+    plugins: [
+      ...base.plugins,
+      new webpack.HotModuleReplacementPlugin(),
+    ],
+  });
+}
+
+function startConfig(base) {
+  return merge(base, {
+    plugins: [
+      ...base.plugins,
+      htmlWebpackPlugin(false),
+    ],
+  });
+}
+
+function buildConfig(base) {
+  const production = process.env.NODE_ENV === 'production';
+  const target = process.env.npm_lifecycle_event;
+
+  if (production && target !== 'reactcards') {
+    return productionBuild(base);
+  }
+
+  const withCssLoaders = addCssLoaders(base);
+  if (target === 'test') {
+    return unitTestConfig(withCssLoaders);
+  }
+
+  const withHotLoaderConfig = addHotLoaderConfig(withCssLoaders);
+  if (target === 'start') {
+    return startConfig(withHotLoaderConfig);
+  }
+
+  return withHotLoaderConfig;
+}
+
+const webpackConfig = buildConfig({
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.[hash:8].js',
@@ -42,92 +150,8 @@ let result = {
     autoprefixer({ browsers: ['> 0.5% in NL'] }),
     precss,
   ],
-};
+});
 
-function htmlWebpackPlugin(minify) {
-  return new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, 'src', 'index.html'),
-    inject: 'body',
-    minify: minify && {
-      collapseWhitespace: true,
-    },
-  });
-}
+// console.log(JSON.stringify(webpackConfig, null, 2));
 
-const production = process.env.NODE_ENV === 'production';
-
-if (production && target !== 'reactcards') {
-  result = merge(result, {
-    entry: [
-      './src/index.jsx',
-    ],
-    module: {
-      loaders: [
-        { test: /\.css$/, loader: ExtractTextPlugin.extract(cssLoaders) },
-      ],
-    },
-    plugins: [
-      ...result.plugins,
-      htmlWebpackPlugin(true),
-      new ExtractTextPlugin('style.[contenthash:8].css', { allChunks: true }),
-      new webpack.optimize.UglifyJsPlugin({
-        compressor: {
-          warnings: false,
-        },
-        output: {
-          comments: false, // Also removes licences
-        },
-      }),
-      new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.OccurenceOrderPlugin(),
-    ],
-  });
-} else {
-  result = merge(result, {
-    module: {
-      loaders: [
-        { test: /\.css$/, loaders: cssLoaders },
-      ],
-    },
-  });
-
-  if (target === 'test') {
-    result = merge(result, {
-      entry: [],
-      target: 'node',
-      node: {
-        __dirname: true,
-        __filename: true,
-      },
-    });
-  } else {
-    result = merge.smart(result, {
-      entry: [
-        'webpack-dev-server/client?http://0.0.0.0:8080',
-        'webpack/hot/only-dev-server',
-        './src/index.jsx',
-      ],
-      module: {
-        loaders: [
-          { test: /\.css$/, loaders: ['style'] },
-        ],
-      },
-      plugins: [
-        ...result.plugins,
-        new webpack.HotModuleReplacementPlugin(),
-      ],
-    });
-    if (target === 'start') {
-      result = merge(result, {
-        plugins: [
-          ...result.plugins,
-          htmlWebpackPlugin(false),
-        ],
-      });
-    }
-  }
-}
-
-// console.log(JSON.stringify(result, null, 2));
-
-export default validate(result);
+export default validate(webpackConfig);
