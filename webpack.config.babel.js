@@ -30,12 +30,29 @@ let result = {
       { test: /\.(jpe?g|png|gif)$/i, loader: 'file-loader?name=[name].[hash:8].[ext]' },
     ],
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+      },
+    }),
+  ],
   postcss: () => [
     stylelint,
     autoprefixer({ browsers: ['> 0.5% in NL'] }),
     precss,
   ],
 };
+
+function htmlWebpackPlugin(minify) {
+  return new HtmlWebpackPlugin({
+    template: path.resolve(__dirname, 'src', 'index.html'),
+    inject: 'body',
+    minify: minify && {
+      collapseWhitespace: true,
+    },
+  });
+}
 
 const production = process.env.NODE_ENV === 'production';
 
@@ -50,6 +67,8 @@ if (production && target !== 'reactcards') {
       ],
     },
     plugins: [
+      ...result.plugins,
+      htmlWebpackPlugin(true),
       new ExtractTextPlugin('style.[contenthash:8].css', { allChunks: true }),
       new webpack.optimize.UglifyJsPlugin({
         compressor: {
@@ -67,7 +86,7 @@ if (production && target !== 'reactcards') {
   result = merge(result, {
     module: {
       loaders: [
-      { test: /\.css$/, loaders: cssLoaders },
+        { test: /\.css$/, loaders: cssLoaders },
       ],
     },
   });
@@ -75,6 +94,11 @@ if (production && target !== 'reactcards') {
   if (target === 'test') {
     result = merge(result, {
       entry: [],
+      target: 'node',
+      node: {
+        __dirname: true,
+        __filename: true,
+      },
     });
   } else {
     result = merge.smart(result, {
@@ -89,21 +113,21 @@ if (production && target !== 'reactcards') {
         ],
       },
       plugins: [
+        ...result.plugins,
         new webpack.HotModuleReplacementPlugin(),
       ],
     });
     if (target === 'start') {
-      result = merge.smart(result, {
+      result = merge(result, {
         plugins: [
           ...result.plugins,
-          new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, 'src', 'index.html'),
-            inject: 'body',
-          }),
+          htmlWebpackPlugin(false),
         ],
       });
     }
   }
 }
+
+// console.log(JSON.stringify(result, null, 2));
 
 export default validate(result);
