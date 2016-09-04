@@ -2,3 +2,4 @@ bundle.js
 dist/
 .tmp/
 *.log*
+.eslintcache
