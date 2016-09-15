@@ -10,4 +10,9 @@ describe('App component', () => {
 
     expect(tree).toMatchSnapshot();
   });
+
+  it('works with chai', () => {
+    expect({ a: 1 }).to.deep.equal({ a: 1 });
+    expect({ a: 1 }).not.to.deep.equal({ a: 2 });
+  });
 });
