@@ -10,6 +10,7 @@ chai.use(chaiJestSnapshot);
 const originalNot = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'not').get;
 Object.defineProperty(chai.Assertion.prototype, 'not', {
   get() {
+    this.isNot = true;
     return originalNot.apply(this);
   },
   set(newNot) {
@@ -19,10 +20,10 @@ Object.defineProperty(chai.Assertion.prototype, 'not', {
 
 global.sinon = sinon;
 
-const originalExpect = global.expect;
+global.jasmineExpect = global.expect;
 
 global.expect = actual => {
-  const originalMatchers = originalExpect(actual);
+  const originalMatchers = global.jasmineExpect(actual);
   const chaiMatchers = chai.expect(actual);
   const combinedMatchers = Object.assign(chaiMatchers, originalMatchers);
   return combinedMatchers;
