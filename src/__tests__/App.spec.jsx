@@ -15,4 +15,9 @@ describe('App component', () => {
     expect({ a: 1 }).to.deep.equal({ a: 1 });
     expect({ a: 1 }).not.to.deep.equal({ a: 2 });
   });
+
+  it('works with jasmine', () => {
+    expect({ a: 1 }).toEqual({ a: 1 });
+    expect({ a: 1 }).not.toEqual({ a: 2 });
+  });
 });
