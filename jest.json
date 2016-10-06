@@ -1,0 +1,6 @@
+{
+    "testRegex": "^.+\\.spec\\.jsx?$",
+    "moduleFileExtensions": ["js", "json", "jsx"],
+    "scriptPreprocessor": "<rootDir>/test/preprocessor.js",
+    "setupTestFrameworkScriptFile": "<rootDir>/test/setup-test-framework-script.js"
+}

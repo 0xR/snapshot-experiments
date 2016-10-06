@@ -10,11 +10,13 @@ import webpack from 'webpack';
 import merge from 'webpack-merge';
 import NodePathReplacePlugin from './NodePathReplacePlugin.js';
 
+export const cssModuleNames = '[name]__[local]___[hash:base64:5]';
+
 function getCssLoaders() {
   const cssLoaderConfig = [
     'css?modules',
     'importLoaders=1',
-    'localIdentName=[name]__[local]___[hash:base64:5]',
+    `localIdentName=${cssModuleNames}`,
   ].join('&');
 
   return [cssLoaderConfig, 'postcss'];

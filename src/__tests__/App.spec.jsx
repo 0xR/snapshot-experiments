@@ -1,6 +1,5 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
-
 import App from '../App.jsx';
 
 describe('App component', () => {
@@ -9,6 +8,16 @@ describe('App component', () => {
       <App />
     ).toJSON();
 
-    expect(tree).to.matchSnapshot(`${__filename}.snap`, 'App renders correctly');
+    expect(tree).toMatchSnapshot();
+  });
+
+  it('works with chai', () => {
+    expect({ a: 1 }).to.deep.equal({ a: 1 });
+    expect({ a: 1 }).not.to.deep.equal({ a: 2 });
+  });
+
+  it('works with jasmine', () => {
+    expect({ a: 1 }).toEqual({ a: 1 });
+    expect({ a: 1 }).not.toEqual({ a: 2 });
   });
 });
